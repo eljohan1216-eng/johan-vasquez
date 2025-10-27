@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Bot</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #eaeaea;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #1f1f1f;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff90;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        button {
+            background-color: #00ff90;
+            color: #121212;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background-color: #00cc74;
+        }
+        #estado {
+            margin-top: 30px;
+            font-size: 20px;
+        }
+        .signal-box {
+            background: #1f1f1f;
+            padding: 20px;
+            margin: 20px auto;
+            width: 60%;
+            border-radius: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <header>⚙️ Panel de Control del Bot</header>
+
+    <div class="container">
+        <button onclick="toggleBot()">Activar/Desactivar Bot</button>
+        <button onclick="verEstado()">Ver Estado</button>
+        <button onclick="verSeñales()">Ver Señales</button>
+
+        <div id="estado">Estado: ---</div>
+
+        <div id="signals"></div>
+    </div>
+
+    <script>
+        async function toggleBot() {
+            const res = await fetch('/api/toggle-bot', { method: 'POST' });
+            const data = await res.json();
+            document.getElementById('estado').innerText =
+                data.ok ? `Bot activo: ${data.activo}` : 'Error al cambiar estado';
+        }
+
+        async function verEstado() {
+            const res = await fetch('/api/estado');
+            const data = await res.json();
+            document.getElementById('estado').innerText =
+                `Bot activo: ${data.activo ? 'Sí' : 'No'} | Modo: ${data.modo}`;
+        }
+
+        async function verSeñales() {
+            const res = await fetch('/api/signals');
+            const data = await res.json();
+            const cont = document.getElementById('signals');
+            cont.innerHTML = '';
+            if (data.length === 0) {
+                cont.innerHTML = '<div class="signal-box">No hay señales.</div>';
+            } else {
+                data.forEach(sig => {
+                    cont.innerHTML += `<div class="signal-box">
+                        <strong>Par:</strong> ${sig.par}<br>
+                        <strong>Tipo:</strong> ${sig.tipo}<br>
+                        <strong>Hora:</strong> ${sig.hora}
+                    </div>`;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
